@@ -26,6 +26,6 @@ void ParsinvCheckpoint(MPI_Comm comm, double* time, double* memory){
     PetscTime(time);
     PetscMallocGetCurrentUsage(memory);
 
-    ParsinvLog(comm, "\tTime:\t%f sec\n\tMemory:\t%i bytes\n\n", *time-time_old, (int)(*memory-memory_old));
+    ParsinvLog(comm, "Time:\t%f sec\n\tMemory:\t%i bytes\n\n", *time-time_old, (int)(*memory-memory_old));
     #endif
 }

@@ -1,9 +1,9 @@
 # load libraries and helper functions
 library(INLA)
 library(fmesher)
-source("R/parsinv.stmatrices.R")
-source("R/parsinv.stmodel.R")
-source("R/parsinv.petsc.io.R")
+source("parsinv.stmatrices.R")
+source("parsinv.stmodel.R")
+source("parsinv.petsc.io.R")
 
 
 # command line arguments
@@ -47,19 +47,19 @@ y = 1 + x + drop(A%*%u) + rnorm(length(x), 0, 0.1)
 
 # save the model information
 stmodel = parsinv.stmodel.define("121", tmesh$manifold, smesh$manifold)
-parsinv.stmodel.write(stmodel, "data/stmodel")
+parsinv.stmodel.write(stmodel, "../data/stmodel")
 
 
 # save the data
 Ab = cbind(1, x)
-parsinv.dense.write(Ab, "data/Ab")
-parsinv.vec.write(y, "data/y")
+parsinv.dense.write(Ab, "../data/Ab")
+parsinv.vec.write(y, "../data/y")
 
 
 # save stmatrices
 jmat = parsinv.jmatrices(stmodel, tmesh)
 gmat = parsinv.gmatrices(stmodel, smesh)
 # amat = parsinv.amatrices(tmesh, smesh)
-parsinv.mats.write(jmat, "data")
-parsinv.mats.write(gmat, "data")
-parsinv.mats.write(amat, "data")
+parsinv.mats.write(jmat, "../data")
+parsinv.mats.write(gmat, "../data")
+parsinv.mats.write(amat, "../data")

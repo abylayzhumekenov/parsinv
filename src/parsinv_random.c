@@ -9,14 +9,11 @@
 #endif
 
 
-ParsinvRandom ParsinvRandomCreate(ParsinvRandomType type, pcg128_t initstate, pcg128_t initseq){
+void ParsinvRandomCreate(ParsinvRandomType type, pcg128_t initstate, pcg128_t initseq, ParsinvRandom* rng){
 
-    ParsinvRandom rng;
-    if(type == PARSINV_RANDOM_DEFAULT)  pcg64_srandom_r(&rng, 0,          (intptr_t)&rng);
-    if(type == PARSINV_RANDOM_UNIQUE)   pcg64_srandom_r(&rng, time(NULL), (intptr_t)&rng);
-    if(type == PARSINV_RANDOM_USER)     pcg64_srandom_r(&rng, initstate,  initseq);
-
-    return rng;
+    if(type == PARSINV_RANDOM_DEFAULT)  pcg64_srandom_r(rng, 0,          (intptr_t)&rng);
+    if(type == PARSINV_RANDOM_UNIQUE)   pcg64_srandom_r(rng, time(NULL), (intptr_t)&rng);
+    if(type == PARSINV_RANDOM_USER)     pcg64_srandom_r(rng, initstate,  initseq);
 }
 
 

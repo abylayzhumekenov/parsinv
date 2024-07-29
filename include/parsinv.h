@@ -9,12 +9,14 @@
 
 #include "parsinv_log.h"
 
-// #include "parsinv_is.h"
-// #include "parsinv_vector.h"
-#include "parsinv_matrix.h"
-// #include "parsinv_ksp.h"
-
 #include "parsinv_random.h"
+#include "parsinv_vector.h"
+#include "parsinv_matrix.h"
+#include "parsinv_inverse.h"
+
+#include "parsinv_hyperpar.h"
+#include "parsinv_stmatrix.h"
+#include "parsinv_gradient.h"
 
 
 #endif

@@ -8,9 +8,17 @@ args = commandArgs(trailingOnly=FALSE)
 for(i in seq_along(args)){
     if(args[i] == "-nt") nt = as.integer(args[i+1])
     if(args[i] == "-ns") ns = as.integer(args[i+1])
+    if(args[i] == "-ms") ms = as.integer(args[i+1])
+    if(args[i] == "-mt") mt = as.integer(args[i+1])
+    if(args[i] == "-res1") res1 = as.double(args[i+1])
+    if(args[i] == "-res2") res2 = as.double(args[i+1])
+    if(args[i] == "-res3") res3 = as.double(args[i+1])
 }
-if(!exists(deparse(substitute(ns)))) ns = 12
-if(!exists(deparse(substitute(nt)))) nt = 2
+if(!exists(deparse(substitute(ns)))) ms = 10
+if(!exists(deparse(substitute(nt)))) mt = 4
+if(!exists(deparse(substitute(res1)))) res1 = 200
+if(!exists(deparse(substitute(res2)))) res2 = 500
+if(!exists(deparse(substitute(res3)))) res3 = 1000
 source("generate.R")
 
 
@@ -18,9 +26,10 @@ source("generate.R")
 
 
 # define a model using INLAspacetime
-data = list(xcoord = rep(sloc[,1], nt), ycoord = rep(sloc[,2], nt), zcoord = rep(sloc[,3], nt),
-            time = rep(1:nt, each=ms), x = x, y = y)
-model = y ~ -1 + Intercept(1) + x + field(list(space = cbind(xcoord, ycoord, zcoord), time = time), model = model.st)
+data = list(xcoord = rep(sloc[,1], nt), ycoord = rep(sloc[,2], nt), time = rep(1:nt, each=ms), 
+            elevation = Ab[,2], northing = Ab[,3], sin = Ab[,4], cos = Ab[,5])
+model = y ~ -1 + Intercept(1) + elevation + northing + sin + cos + 
+    field(list(space = cbind(xcoord, ycoord), time = time), model = model.st)
 model.st = stModel.define(smesh, tmesh, "121",
                           control.priors = list(prs    = c(1.00, 0.01),
                                                 prt    = c(1.00, 0.01),

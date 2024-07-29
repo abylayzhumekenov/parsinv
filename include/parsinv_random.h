@@ -34,9 +34,8 @@ typedef enum {
  * @param type 
  * @param initstate 
  * @param initseq 
- * @return ParsinvRandom 
  */
-ParsinvRandom ParsinvRandomCreate(ParsinvRandomType type, pcg128_t initstate, pcg128_t initseq);
+void ParsinvRandomCreate(ParsinvRandomType type, pcg128_t initstate, pcg128_t initseq, ParsinvRandom* rng);
 
 
 /**
