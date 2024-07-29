@@ -308,6 +308,7 @@ int main(int argc, char** argv){
                         (work[4] - work[11])) / epsilon;                                                    // hypeprior
             hess[k] = (grad[k] - hess[k]) / epsilon;                // form hessian from two gradients
             hess[k] = hess[k] * (!gd) + 1.0 * (gd);                 // use gradient descent if gd = 1
+            if(grad[k]*grad[k] / hess[k]*hess[k] > 1) hess[k] = grad[k];    // limit update 1 at max
             grad[k] += (work[14] + work[15]) / 2.0 / epsilon;       // correction part
 
             theta[k] += epsilon;

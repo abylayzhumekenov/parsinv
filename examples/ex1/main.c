@@ -40,7 +40,7 @@ int main(int argc, char** argv){
     int n_over = 1;
     int n_iter = 1000;
     int n_samples = 10;
-
+    int gd = 0;
     double lrate    = 0.1;
     double drate    = 1.0;
     double epsilon  = 0.05;
@@ -58,6 +58,7 @@ int main(int argc, char** argv){
         if(!strcmp(argv[i], "-ni"))  n_iter     = atoi(argv[i+1]);
         if(!strcmp(argv[i], "-ns"))  n_samples  = atoi(argv[i+1]);
         if(!strcmp(argv[i], "-no"))  n_over     = atoi(argv[i+1]);
+        if(!strcmp(argv[i], "-gd"))  gd         = atoi(argv[i+1]);
         if(!strcmp(argv[i], "-lr"))  lrate      = atof(argv[i+1]);
         if(!strcmp(argv[i], "-dr"))  drate      = atof(argv[i+1]);
         if(!strcmp(argv[i], "-ee"))  epsilon    = atof(argv[i+1]);
@@ -301,6 +302,8 @@ int main(int argc, char** argv){
                         (work[10] - nu - work[1]-2*work[2]-work[3] + work[7]+2*work[8]+work[9])) / 2.0 +    // posterior
                         (work[4] - work[11])) / epsilon;                                                    // hypeprior
             hess[k] = (grad[k] - hess[k]) / epsilon;                // form hessian from two gradients
+            hess[k] = hess[k] * (!gd) + 1.0 * (gd);                 // use gradient descent if gd = 1
+            if(grad[k]*grad[k] / hess[k]*hess[k] > 1) hess[k] = grad[k];    // limit update 1 at max
             grad[k] += (work[14] + work[15]) / 2.0 / epsilon;       // correction part
 
             theta[k] += epsilon;
