@@ -307,8 +307,9 @@ int main(int argc, char** argv){
                         (work[10] - nu - work[1]-2*work[2]-work[3] + work[7]+2*work[8]+work[9])) / 2.0 +    // posterior
                         (work[4] - work[11])) / epsilon;                                                    // hypeprior
             hess[k] = (grad[k] - hess[k]) / epsilon;                // form hessian from two gradients
-            hess[k] = hess[k] * (!gd) + 1.0 * (gd);                 // use gradient descent if gd = 1
-            if(grad[k]*grad[k] / hess[k]*hess[k] > 1) hess[k] = grad[k];    // limit update 1 at max
+            hess[k] = hess[k] * (!gd) - 1.0 * (gd);                 // use gradient descent if gd = 1
+            if(grad[k] / hess[k] > 1)  hess[k] = grad[k];            // limit update to  1 at max
+            if(grad[k] / hess[k] < -1) hess[k] = grad[k];            // limit update to -1 at min
             grad[k] += (work[14] + work[15]) / 2.0 / epsilon;       // correction part
 
             theta[k] += epsilon;
