@@ -37,13 +37,9 @@ for some right hand side $b$.
 ## Dependencies
 
 * mpi
-* openmp
-* [pardiso](https://panua.ch/pardiso/) (requires license, not the MKL version)
 * [petsc](https://petsc.org/release/) (configure with `--download-mumps --download-scalapack --download-metis --download-parmetis`)
-* pcg_random (installed automatically)
 
 After installing the dependencies, add `PETSC_DIR`, `PETSC_ARCH`, `PARDISO_DIR` to `LD_LIBRARY_PATH` and export everything.
-The license path `PARDISO_LIC_PATH` and `PARDISOLICMESSAGE` have to be exported as well, the latter can be set to 1 to suppress messages.
 
 
 ## Download and compile
@@ -54,15 +50,38 @@ To download the source code, run
 git clone https://github.com/abylayzhumekenov/parsinv.git
 ```
 
-Compile by running `make` or `make all` in the project directory.
-Clean using `make clean` and reset completely using `make distclean`.
-To compile a debug version, run `make clean` and then `make DEBUG=-DDEBUG` or `make all DEBUG=-DDEBUG`.
-To go back to release version, run `make clean` and `make` or `make all`.
+Compile as a shared library by running `make`, `make all` or `make debug` in the project directory.
+Clean using `make clean`. To swtich between debug and release versions, run `make clean release` or `make clean debug`.
+
+
+## Compile examples
+
+Compile examples in subfolders by changing working directory `cd examples/ex#` and running `make`.
+
+
+## Generate data
+
+Generate necessary data for examples by further changing the directory `cd R` and 
+running `Rscript generate.R [rscript_options]` with the following options
+
+* `-ns` latent spatial size
+* `-nt` latent temporal size
+* `-ms` data spatial size
+* `-mt` data spatial size
+* `-res1` spatial mesh convexity
+* `-res2` spatial mesh size
+* `-res3` spatial boundary size
+
+This will generate FEM matrices as well as the data objects in the `examples/ex#/data` folder in binary format, 
+where the first 64 bits (PETSc header) can be ignored. Note that on linux machines, R and PETSc have swapped endianness, 
+this must be taken into account when reading and writing binary files.
+
+You can run `fitinla.R` script with the same options to approximate hyperparameters for small to medium sized examples.
 
 
 ## Run with options
 
-Run as 
+Run examples above as
 ```
 mpiexec [mpi_options] ./bin/main [parsinv_options]
 ```
@@ -71,30 +90,10 @@ MPI options:
 * `-n` number of processes
 
 Program options:
+* `-ni` number of iterations
 * `-ns` number of samples
-* `-nn` number of neighbors
-* `-ds` direct solver   (`0 = MUMPS`, `1 = PARDISO`)
-* `-v` verbose mode     (`0 = FALSE`, `1 = TRUE`)
-* `-p` profiling mode   (`0 = FALSE`, `1 = TRUE`)
-
-Note that `-v 1 -p 1` works only in debug build, produced by `make DEBUG=-DDEBUG`. By default, they are ignored for efficiency.
-
-
-## Input and output
-
-Run
-
-```
-Rscript R/simulation/generate.R [rscript_options]
-```
-
-from the project directory to generate precision matrices for simulated example. Alternatively,
-write your own R script for your application and save the matrices into `data` folder in the main directory.
-You can check the simulation example, which uses helper functions from `R` folder to do so.
-For the simulation, the arguments can be set through command line options as:
-
-* `-nt` temporal dimension
-* `-ns` spatial dimension (approximate)
-
-The program can save the output as binary vectors, where the first 64 bits (PETSc header) can be ignored.
-Note that on linux machines, R and PETSc have swapped endianness, this must be taken into account when reading and writing binary files.
+* `-no` overlap size (temporal)
+* `-lr` learning rate
+* `-dr` decay rate
+* `-ee` epsilon
+* `-rt` gradient tolerance
