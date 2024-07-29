@@ -307,6 +307,7 @@ int main(int argc, char** argv){
                         (work[10] - nu - work[1]-2*work[2]-work[3] + work[7]+2*work[8]+work[9])) / 2.0 +    // posterior
                         (work[4] - work[11])) / epsilon;                                                    // hypeprior
             hess[k] = (grad[k] - hess[k]) / epsilon;                // form hessian from two gradients
+            hess[k] = hess[k] * (!gd) + 1.0 * (gd);                 // use gradient descent if gd = 1
             grad[k] += (work[14] + work[15]) / 2.0 / epsilon;       // correction part
 
             theta[k] += epsilon;
@@ -322,7 +323,7 @@ int main(int argc, char** argv){
         ParsinvLog(PETSC_COMM_WORLD, "Rel |g|^2:\t%f\n", normg / norm0);
 
         if(normg / norm0 < rtol*rtol){      ParsinvLog(PETSC_COMM_WORLD, "Converged!\n"); break;    }
-        for(int k=0; k<4; k++)              theta[k] -= lrate * grad[k] / (hess[k] * (!gd) + 1.0 * (gd));
+        for(int k=0; k<4; k++)              theta[k] -= lrate * grad[k] / hess[k];
         lrate *= drate;
 
         ParsinvLog(PETSC_COMM_WORLD, "\n");
