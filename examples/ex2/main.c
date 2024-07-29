@@ -40,7 +40,7 @@ int main(int argc, char** argv){
     int n_over = 1;
     int n_iter = 1000;
     int n_samples = 10;
-
+    int gd = 0;
     double lrate    = 0.1;
     double drate    = 1.0;
     double epsilon  = 0.05;
@@ -58,6 +58,7 @@ int main(int argc, char** argv){
         if(!strcmp(argv[i], "-ni"))  n_iter     = atoi(argv[i+1]);
         if(!strcmp(argv[i], "-ns"))  n_samples  = atoi(argv[i+1]);
         if(!strcmp(argv[i], "-no"))  n_over     = atoi(argv[i+1]);
+        if(!strcmp(argv[i], "-gd"))  gd         = atoi(argv[i+1]);
         if(!strcmp(argv[i], "-lr"))  lrate      = atof(argv[i+1]);
         if(!strcmp(argv[i], "-dr"))  drate      = atof(argv[i+1]);
         if(!strcmp(argv[i], "-ee"))  epsilon    = atof(argv[i+1]);
@@ -321,7 +322,7 @@ int main(int argc, char** argv){
         ParsinvLog(PETSC_COMM_WORLD, "Rel |g|^2:\t%f\n", normg / norm0);
 
         if(normg / norm0 < rtol*rtol){      ParsinvLog(PETSC_COMM_WORLD, "Converged!\n"); break;    }
-        for(int k=0; k<4; k++)              theta[k] -= lrate * grad[k] / hess[k];
+        for(int k=0; k<4; k++)              theta[k] -= lrate * grad[k] / (hess[k] * (!gd) + 1.0 * (gd));
         lrate *= drate;
 
         ParsinvLog(PETSC_COMM_WORLD, "\n");

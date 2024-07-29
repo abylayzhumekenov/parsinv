@@ -93,6 +93,7 @@ Program options:
 * `-ni` number of iterations
 * `-ns` number of samples
 * `-no` overlap size (temporal)
+* `-gd` use gradient descent (else Newton)
 * `-lr` learning rate
 * `-dr` decay rate
 * `-ee` epsilon
