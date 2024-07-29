@@ -313,6 +313,10 @@ int main(int argc, char** argv){
 
         if(!iter) continue;
 
+        for(int k=0; k<4; k++)              ParsinvLog(PETSC_COMM_WORLD, "%f\t%f\t%f\n", theta[k], grad[k], hess[k]);
+        ParsinvLog(PETSC_COMM_WORLD, "Abs |g|^2:\t%f\n", normg);
+        ParsinvLog(PETSC_COMM_WORLD, "Rel |g|^2:\t%f\n", normg / norm0);
+
         normg = 0.0;
         for(int k=0; k<4; k++)              normg += grad[k] * grad[k];
         if(iter==1)                         norm0 = normg;
@@ -320,9 +324,6 @@ int main(int argc, char** argv){
         for(int k=0; k<4; k++)              theta[k] -= lrate * grad[k] / hess[k];
         lrate *= drate;
 
-        for(int k=0; k<4; k++)              ParsinvLog(PETSC_COMM_WORLD, "%f\t%f\t%f\n", theta[k], grad[k], hess[k]);
-        ParsinvLog(PETSC_COMM_WORLD, "Abs |g|^2:\t%f\n", normg);
-        ParsinvLog(PETSC_COMM_WORLD, "Rel |g|^2:\t%f\n", normg / norm0);
         ParsinvLog(PETSC_COMM_WORLD, "\n");
 
         ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
