@@ -204,15 +204,16 @@ void ParsinvInverseMatCorrect(KSP ksp, IS is_sub, Mat B, int n_samples, ParsinvR
 
 void ParsinvInverseMatMatTrace(Mat A, Mat B, Mat C, IS is_over, double* trace){
 
-    Vec c;
+    Vec c, c_sub;
     int ok = 0;
     double sum = 0;
 
     ParsinvMatHadamardSparse(A, B, C);
-    MatZeroRowsIS(C, is_over, 0.0, NULL, NULL);
     MatCreateVecs(C, &c, NULL);
     MatGetRowSum(C, c);
-    VecSum(c, &sum);
+    VecGetSubVector(c, is_over, &c_sub);
+    VecSum(c_sub, &sum);
+    VecRestoreSubVector(c, is_over, &c_sub);
     VecDestroy(&c);
     ok += MPI_Allreduce(&sum, trace, 1, MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
 }

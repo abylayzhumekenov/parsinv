@@ -194,6 +194,8 @@ int main(int argc, char** argv){
 
     for(int iter=0; iter<n_iter; iter++){
 
+        ParsinvLog(PETSC_COMM_WORLD, "Iteration: %i\n", iter);
+
         /* LIKELIHOOD */
         ParsinvAssembleQyy(Myy, theta, Qyy);
         ParsinvVecMatVec(Qyy, y, y, wy, &work[0]);
@@ -303,26 +305,23 @@ int main(int argc, char** argv){
                         (work[4] - work[11])) / epsilon;                                                    // hypeprior
             hess[k] = (grad[k] - hess[k]) / epsilon;                // form hessian from two gradients
             hess[k] = hess[k] * (!gd) - 1.0 * (gd);                 // use gradient ascent if gd = 1
-            if(lrate * grad[k] / hess[k] > 1)  hess[k] = lrate * grad[k];   // limit update to  1 at max
-            if(lrate * grad[k] / hess[k] < -1) hess[k] = -lrate * grad[k];  // limit update to -1 at min
             grad[k] += (work[14] + work[15]) / 2.0 / epsilon;       // correction part
-
+            
             theta[k] += epsilon;
         }
 
         if(!iter) continue;
 
-        ParsinvLog(PETSC_COMM_WORLD, "Iteration: %i\n", iter);
         normg = 0.0;
         for(int k=0; k<4; k++)              normg += grad[k] * grad[k];
         if(iter==1)                         norm0 = normg;
-        if(normg / norm0 < rtol*rtol){      ParsinvLog(PETSC_COMM_WORLD, "Converged!\n"); break;    }
-        for(int k=0; k<4; k++)              theta[k] -= lrate * grad[k] / hess[k];
-        lrate *= drate;
-
         for(int k=0; k<4; k++)              ParsinvLog(PETSC_COMM_WORLD, "%f\t%f\t%f\n", theta[k], grad[k], hess[k]);
         ParsinvLog(PETSC_COMM_WORLD, "Abs |g|^2:\t%f\n", normg);
         ParsinvLog(PETSC_COMM_WORLD, "Rel |g|^2:\t%f\n", normg / norm0);
+
+        if(normg / norm0 < rtol*rtol){      ParsinvLog(PETSC_COMM_WORLD, "Converged!\n"); break;    }
+        for(int k=0; k<4; k++)              theta[k] -= lrate * grad[k] / hess[k];
+        lrate *= drate;
         ParsinvLog(PETSC_COMM_WORLD, "\n");
 
         ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);

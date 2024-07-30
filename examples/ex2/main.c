@@ -190,9 +190,6 @@ int main(int argc, char** argv){
     MatCreateVecs(Qbb_prior, &wb, &wb2);
     MatCreateVecs(Qyy, &wy, NULL);
 
-                KSPSetTolerances(ksp_postr, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT, 100);
-
-
     // ---------------------------------------------------------------------------------------
 
     for(int iter=0; iter<n_iter; iter++){
@@ -308,8 +305,6 @@ int main(int argc, char** argv){
                         (work[4] - work[11])) / epsilon;                                                    // hypeprior
             hess[k] = (grad[k] - hess[k]) / epsilon;                // form hessian from two gradients
             hess[k] = hess[k] * (!gd) - 1.0 * (gd);                 // use gradient descent if gd = 1
-            if(lrate * grad[k] / hess[k] > 1)  hess[k] = lrate * grad[k];   // limit update to  1 at max
-            if(lrate * grad[k] / hess[k] < -1) hess[k] = -lrate * grad[k];  // limit update to -1 at min
             grad[k] += (work[14] + work[15]) / 2.0 / epsilon;       // correction part
 
             theta[k] += epsilon;
