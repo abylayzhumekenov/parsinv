@@ -300,11 +300,11 @@ int main(int argc, char** argv){
             ParsinvHyperparPrior(theta, manifold, &work[11]);
 
             hess[k] = (((ny*epsilon*(k==3) - work[0] + work[5]) +                                           // likelihood
-                        (work[6] - nu) -                                                                    // prior
-                        (work[10] - nu - work[1]-2*work[2]-work[3] + work[7]+2*work[8]+work[9])) / 2.0 +    // posterior
+                        (-work[6] + nu) -                                                                    // prior
+                        (-work[10] + nu - work[1]-2*work[2]-work[3] + work[7]+2*work[8]+work[9])) / 2.0 +    // posterior
                         (work[4] - work[11])) / epsilon;                                                    // hypeprior
             hess[k] = (grad[k] - hess[k]) / epsilon;                // form hessian from two gradients
-            hess[k] = hess[k] * (!gd) - 1.0 * (gd);                 // use gradient descent if gd = 1
+            hess[k] = hess[k] * (!gd) - 1.0 * (gd);                 // use gradient ascent if gd = 1
             grad[k] += (work[14] + work[15]) / 2.0 / epsilon;       // correction part
 
             theta[k] += epsilon;
