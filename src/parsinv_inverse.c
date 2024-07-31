@@ -12,7 +12,7 @@ void ParsinvInverseKSPCreate(MPI_Comm comm, Mat A, int n_over, KSP* ksp){
     int n_sub;
     PC pc, pc_sub;
     KSP *ksp_sub;
-    IS *is_inner;
+    IS *is_sub;
 
     KSPCreate(comm, ksp);
     KSPSetOperators(*ksp, A, A);
@@ -21,7 +21,7 @@ void ParsinvInverseKSPCreate(MPI_Comm comm, Mat A, int n_over, KSP* ksp){
     PCSetOperators(pc, A, A);
     PCSetType(pc, PCGASM);
     PCGASMSetOverlap(pc, n_over);
-    PCGASMCreateSubdomains(A, size, &n_sub, &is_inner);
+    PCGASMCreateSubdomains(A, size, &n_sub, &is_sub);
     PCSetUp(pc);
     
     PCGASMGetSubKSP(pc, &n_sub, NULL, &ksp_sub);
@@ -45,10 +45,10 @@ void ParsinvInverseKSPSetUp(KSP ksp){
     KSPGetPC(ksp, &pc);
     PCGASMGetSubKSP(pc, &n_sub, NULL, &ksp_sub);
     KSPGetPC(ksp_sub[0], &pc_sub);
-    PCSetUp(pc_sub);
-    KSPSetUp(ksp_sub[0]);
-    PCSetUp(pc);
     KSPSetUp(ksp);
+    PCSetUp(pc);
+    KSPSetUp(ksp_sub[0]);
+    PCSetUp(pc_sub);
 }
 
 
@@ -204,16 +204,15 @@ void ParsinvInverseMatCorrect(KSP ksp, IS is_sub, Mat B, int n_samples, ParsinvR
 
 void ParsinvInverseMatMatTrace(Mat A, Mat B, Mat C, IS is_over, double* trace){
 
-    Vec c, c_sub;
+    Vec c;
     int ok = 0;
     double sum = 0;
 
     ParsinvMatHadamardSparse(A, B, C);
     MatCreateVecs(C, &c, NULL);
     MatGetRowSum(C, c);
-    VecGetSubVector(c, is_over, &c_sub);
-    VecSum(c_sub, &sum);
-    VecRestoreSubVector(c, is_over, &c_sub);
+    VecISSet(c, is_over, 0.0);
+    VecSum(c, &sum);
     VecDestroy(&c);
     ok += MPI_Allreduce(&sum, trace, 1, MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
 }

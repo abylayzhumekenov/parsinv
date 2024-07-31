@@ -158,8 +158,6 @@ int main(int argc, char** argv){
     MatDuplicate(Qbb_prior, MAT_COPY_VALUES, &Sbb_prior_);
     MatDuplicate(Qbb_prior, MAT_COPY_VALUES, &Sbb_postr_);
     
-    ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
-
     ParsinvInverseKSPCreate(PETSC_COMM_WORLD, Quu_prior, n_over, &ksp_prior);
     ParsinvInverseKSPCreate(PETSC_COMM_WORLD, Quu_postr, n_over, &ksp_postr);
     ParsinvInverseKSPCreate(PETSC_COMM_WORLD, Quu_prior_, n_over, &ksp_prior_);
@@ -182,13 +180,13 @@ int main(int argc, char** argv){
     ParsinvInverseMatCreate(ksp_prior_, &Wuu_prior_sub_);
     ParsinvInverseMatCreate(ksp_postr_, &Wuu_postr_sub_);
 
-    ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
-
     MatCreateVecs(Quu_prior, &xu, &xu_);
     MatCreateVecs(Quu_prior, &wu, &wu2);
     MatCreateVecs(Qbb_prior, &xb, &xb_);
     MatCreateVecs(Qbb_prior, &wb, &wb2);
     MatCreateVecs(Qyy, &wy, NULL);
+
+    ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
 
     // ---------------------------------------------------------------------------------------
 
@@ -300,21 +298,19 @@ int main(int argc, char** argv){
             ParsinvHyperparPrior(theta, manifold, &work[11]);
 
             hess[k] = (((ny*epsilon*(k==3) - work[0] + work[5]) +                                           // likelihood
-                        (-work[6] + nu) -                                                                    // prior
-                        (-work[10] + nu - work[1]-2*work[2]-work[3] + work[7]+2*work[8]+work[9])) / 2.0 +    // posterior
+                        (work[6] - nu) -                                                                    // prior
+                        (work[10] - nu - work[1]-2*work[2]-work[3] + work[7]+2*work[8]+work[9])) / 2.0 +    // posterior
                         (work[4] - work[11])) / epsilon;                                                    // hypeprior
             hess[k] = (grad[k] - hess[k]) / epsilon;                // form hessian from two gradients
             hess[k] = hess[k] * (!gd) - 1.0 * (gd);                 // use gradient ascent if gd = 1
             grad[k] += (work[14] + work[15]) / 2.0 / epsilon;       // correction part
-
+            
             theta[k] += epsilon;
         }
 
-        if(!iter) continue;
-
         normg = 0.0;
         for(int k=0; k<4; k++)              normg += grad[k] * grad[k];
-        if(iter==1)                         norm0 = normg;
+        if(!iter)                           norm0 = normg;
         for(int k=0; k<4; k++)              ParsinvLog(PETSC_COMM_WORLD, "%f\t%f\t%f\n", theta[k], grad[k], hess[k]);
         ParsinvLog(PETSC_COMM_WORLD, "Abs |g|^2:\t%f\n", normg);
         ParsinvLog(PETSC_COMM_WORLD, "Rel |g|^2:\t%f\n", normg / norm0);
@@ -322,7 +318,6 @@ int main(int argc, char** argv){
         if(normg / norm0 < rtol*rtol){      ParsinvLog(PETSC_COMM_WORLD, "Converged!\n"); break;    }
         for(int k=0; k<4; k++)              theta[k] -= lrate * grad[k] / hess[k];
         lrate *= drate;
-
         ParsinvLog(PETSC_COMM_WORLD, "\n");
 
         ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
