@@ -195,10 +195,12 @@ int main(int argc, char** argv){
         ParsinvLog(PETSC_COMM_WORLD, "Iteration: %i\n\n", iter);
 
         /* LIKELIHOOD */
+            ParsinvLog(PETSC_COMM_WORLD, "Assembly\n");
         ParsinvAssembleQyy(Myy, theta, Qyy);
         ParsinvVecMatVec(Qyy, y, y, wy, &work[0]);
 
         /* PRIOR */
+            ParsinvLog(PETSC_COMM_WORLD, "Prior\n");
         ParsinvAssembleQuu_prior(Muu, theta, manifold, Quu_prior);
         ParsinvAssembleQub_prior(Qub_prior);
         ParsinvAssembleQbb_prior(Qbb_prior);
@@ -207,6 +209,7 @@ int main(int argc, char** argv){
         ParsinvInverseMatCorrect(ksp_prior, is_sub, Wuu_prior_sub, n_samples, &rng);
 
         /* POSTERIOR */
+            ParsinvLog(PETSC_COMM_WORLD, "Posterior\n");
         ParsinvAssembleQuu_postr(Muu, theta, manifold, Quu_postr);
         ParsinvAssembleQub_postr(Mub, theta, Qub_postr);
         ParsinvAssembleQbb_postr(Mbb, theta, Qbb_postr);
@@ -225,7 +228,8 @@ int main(int argc, char** argv){
         ParsinvHyperparPrior(theta, manifold, &work[4]);
         
         for(int k=0; k<4; k++){
-
+            
+                ParsinvLog(PETSC_COMM_WORLD, "Hyperpar %i\n", k);
             theta[k] += epsilon;
 
             /* LIKELIHOOD */
