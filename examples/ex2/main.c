@@ -201,6 +201,7 @@ int main(int argc, char** argv){
 
         /* PRIOR */
             ParsinvLog(PETSC_COMM_WORLD, "Prior\n");
+            ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
         ParsinvAssembleQuu_prior(Muu, theta, manifold, Quu_prior);
         ParsinvAssembleQub_prior(Qub_prior);
         ParsinvAssembleQbb_prior(Qbb_prior);
@@ -210,6 +211,7 @@ int main(int argc, char** argv){
 
         /* POSTERIOR */
             ParsinvLog(PETSC_COMM_WORLD, "Posterior\n");
+            ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
         ParsinvAssembleQuu_postr(Muu, theta, manifold, Quu_postr);
         ParsinvAssembleQub_postr(Mub, theta, Qub_postr);
         ParsinvAssembleQbb_postr(Mbb, theta, Qbb_postr);
@@ -230,6 +232,8 @@ int main(int argc, char** argv){
         for(int k=0; k<4; k++){
             
                 ParsinvLog(PETSC_COMM_WORLD, "Hyperpar %i\n", k);
+                ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
+
             theta[k] += epsilon;
 
             /* LIKELIHOOD */
