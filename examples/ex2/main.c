@@ -196,6 +196,7 @@ int main(int argc, char** argv){
 
         /* LIKELIHOOD */
             ParsinvLog(PETSC_COMM_WORLD, "Assembly\n");
+            ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
         ParsinvAssembleQyy(Myy, theta, Qyy);
         ParsinvVecMatVec(Qyy, y, y, wy, &work[0]);
 
@@ -206,7 +207,7 @@ int main(int argc, char** argv){
         ParsinvAssembleQub_prior(Qub_prior);
         ParsinvAssembleQbb_prior(Qbb_prior);
         ParsinvInverseKSPSetUp(ksp_prior);
-        ParsinvInverseMatInvert(ksp_prior, Cuu_prior_sub);
+        // ParsinvInverseMatInvert(ksp_prior, Cuu_prior_sub);
         ParsinvInverseMatCorrect(ksp_prior, is_sub, Wuu_prior_sub, n_samples, &rng);
 
         /* POSTERIOR */
