@@ -206,9 +206,13 @@ int main(int argc, char** argv){
         ParsinvAssembleQuu_prior(Muu, theta, manifold, Quu_prior);
         ParsinvAssembleQub_prior(Qub_prior);
         ParsinvAssembleQbb_prior(Qbb_prior);
+            ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
         ParsinvInverseKSPSetUp(ksp_prior);
-        // ParsinvInverseMatInvert(ksp_prior, Cuu_prior_sub);
+            ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
+        ParsinvInverseMatInvert(ksp_prior, Cuu_prior_sub);
+            ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
         ParsinvInverseMatCorrect(ksp_prior, is_sub, Wuu_prior_sub, n_samples, &rng);
+            ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
 
         /* POSTERIOR */
             ParsinvLog(PETSC_COMM_WORLD, "Posterior\n");
@@ -216,16 +220,24 @@ int main(int argc, char** argv){
         ParsinvAssembleQuu_postr(Muu, theta, manifold, Quu_postr);
         ParsinvAssembleQub_postr(Mub, theta, Qub_postr);
         ParsinvAssembleQbb_postr(Mbb, theta, Qbb_postr);
+            ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
         ParsinvInverseKSPSetUp(ksp_postr);
+            ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
         ParsinvInverseMatInvert(ksp_postr, Cuu_postr_sub);
+            ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
         ParsinvInverseMatCorrect(ksp_postr, is_sub, Wuu_postr_sub, n_samples, &rng);
+            ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
         ParsinvMatSchur(ksp_postr, Quu_postr, Qub_postr, Qbb_postr, Sub_postr, &Sbb_postr);
+            ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
         ParsinvMatSolveDense(Sbb_postr, &Cbb_postr);
+            ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
         ParsinvInverseMatSolve(ksp_postr, Qyy, Qub_postr, Auy, Ayb, Cbb_postr, 
                                y, wy, wu, wu2, wb, wb2, xu, xb);
+            ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
         ParsinvVecMatVec(Quu_postr, xu, xu, wu, &work[1]);
         ParsinvVecMatVec(Qub_postr, xu, xb, wu, &work[2]);
         ParsinvVecMatVec(Qbb_postr, xb, xb, wb, &work[3]);
+            ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
 
         /* HYPERPRIOR */
         ParsinvHyperparPrior(theta, manifold, &work[4]);
