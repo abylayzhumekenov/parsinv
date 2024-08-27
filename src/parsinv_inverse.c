@@ -153,6 +153,9 @@ void ParsinvInverseMatCorrect(KSP ksp, IS is_sub, Mat B, int n_samples, ParsinvR
         ParsinvRandomNormalIID(rng, z);
         MatMult(A, z, w);
         KSPSolve(ksp, z, x);
+        int niter;
+        KSPGetIterationNumber(ksp, &niter);
+        PetscPrintf(PETSC_COMM_WORLD, "\tniter = %i\n", niter);
             
         VecGetSubVector(z, is_sub, &z_sub);
         VecGetSubVector(x, is_sub, &x_sub);
