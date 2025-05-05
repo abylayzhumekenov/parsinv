@@ -8,7 +8,8 @@ IFLAGS = -I$(INC) \
 		 -I$(PETSC_DIR)/include \
 		 -I$(PETSC_DIR)/$(PETSC_ARCH)/include 
 LFLAGS = -L$(LIB) -lparsinv \
-		 -L$(PETSC_DIR)/$(PETSC_ARCH)/lib -lpetsc
+		 -L$(PETSC_DIR)/$(PETSC_ARCH)/lib -lpetsc \
+		 -lm
 
 .PHONY: all clean
 

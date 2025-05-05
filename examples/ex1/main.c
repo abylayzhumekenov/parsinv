@@ -1,10 +1,11 @@
 #include "../../include/parsinv.h"
+#include <math.h>
 
 
 /**
  * @brief Run example 1
  * 
- * Good parameter values: -lr 0.4 -ee 0.5 -rt 1e-2
+ * Good parameter values: -lr 0.1
  * 
  * @param argc 
  * @param argv 
@@ -40,13 +41,17 @@ int main(int argc, char** argv){
     int n_over = 1;
     int n_iter = 1000;
     int n_samples = 10;
-    int gd = 0;
+    int n_restart = n_iter;
+    int use_gd = 0;
+    double lrate0   = 0.1;
     double lrate    = 0.1;
     double drate    = 1.0;
+    double dpoly    = 0.0;
     double epsilon  = 0.05;
     double norm0    = 1.0;
     double normg    = 0.0;
     double rtol     = 1e-2;
+    double atol     = 1e-2;
     double theta[4] = {0, 0, 0, 0};
     double grad [4] = {0, 0, 0, 0};
     double hess [4] = {0, 0, 0, 0};
@@ -58,11 +63,14 @@ int main(int argc, char** argv){
         if(!strcmp(argv[i], "-ni"))  n_iter     = atoi(argv[i+1]);
         if(!strcmp(argv[i], "-ns"))  n_samples  = atoi(argv[i+1]);
         if(!strcmp(argv[i], "-no"))  n_over     = atoi(argv[i+1]);
-        if(!strcmp(argv[i], "-gd"))  gd         = atoi(argv[i+1]);
-        if(!strcmp(argv[i], "-lr"))  lrate      = atof(argv[i+1]);
+        if(!strcmp(argv[i], "-nr"))  n_restart  = atoi(argv[i+1]);
+        if(!strcmp(argv[i], "-gd"))  use_gd     = atoi(argv[i+1]);
+        if(!strcmp(argv[i], "-lr"))  lrate0     = atof(argv[i+1]);
         if(!strcmp(argv[i], "-dr"))  drate      = atof(argv[i+1]);
+        if(!strcmp(argv[i], "-dp"))  dpoly      = atof(argv[i+1]);
         if(!strcmp(argv[i], "-ee"))  epsilon    = atof(argv[i+1]);
         if(!strcmp(argv[i], "-rt"))  rtol       = atof(argv[i+1]);
+        if(!strcmp(argv[i], "-at"))  atol       = atof(argv[i+1]);
         if(!strcmp(argv[i], "-hh")){
             for(int j=0; j<4; j++) theta[j] = atof(argv[i+1+j]);
         }
@@ -301,25 +309,31 @@ int main(int argc, char** argv){
                         (work[6] - nu) -                                                                    // prior
                         (work[10] - nu - work[1]-2*work[2]-work[3] + work[7]+2*work[8]+work[9])) / 2.0 +    // posterior
                         (work[4] - work[11])) / epsilon;                                                    // hypeprior
-            hess[k] = (grad[k] - hess[k]) / epsilon;                // form hessian from two gradients
-            hess[k] = hess[k] * (!gd) - 1.0 * (gd);                 // use gradient ascent if gd = 1
-            grad[k] += (work[14] + work[15]) / 2.0 / epsilon;       // correction part
+            hess[k] = (grad[k] - hess[k]) / epsilon;                        // form hessian from two gradients
+            hess[k] = (hess[k] < -1.0) ? hess[k] : -1.0;                    // use gradient descent if negative hess is not PSD
+            hess[k] = hess[k] * (!use_gd) - 1.0 * (use_gd);                         // use gradient ascent if gd = 1
+            grad[k] += (work[14] + work[15]) / 2.0 / epsilon;               // correction part
             
             theta[k] += epsilon;
         }
 
         normg = 0.0;
         for(int k=0; k<4; k++)              normg += grad[k] * grad[k];
-        if(!iter)                           norm0 = normg;
+        if(iter == 0)                       norm0 = normg;
+        if(dpoly > 0.5)                     lrate = pow(iter%n_restart+1, -dpoly) * lrate0;
+        else                                lrate = pow(drate, iter%n_restart) * lrate0;
+
         for(int k=0; k<4; k++)              ParsinvLog(PETSC_COMM_WORLD, "%f\t%f\t%f\n", theta[k], grad[k], hess[k]);
-        ParsinvLog(PETSC_COMM_WORLD, "Abs |g|^2:\t%f\n", normg);
-        ParsinvLog(PETSC_COMM_WORLD, "Rel |g|^2:\t%f\n", normg / norm0);
+        ParsinvLog(PETSC_COMM_WORLD, "Abs |g|:\t%f\n", pow(normg, 0.5));
+        ParsinvLog(PETSC_COMM_WORLD, "Rel |g|:\t%f\n", pow(normg / norm0, 0.5));
+        ParsinvLog(PETSC_COMM_WORLD, "lrate:  \t%f\n", lrate);
 
-        if(normg / norm0 < rtol*rtol){      ParsinvLog(PETSC_COMM_WORLD, "Converged!\n"); break;    }
+        if(normg         < atol*atol){      ParsinvLog(PETSC_COMM_WORLD, "Converged!\n"); break; }
+        if(normg / norm0 < rtol*rtol){      ParsinvLog(PETSC_COMM_WORLD, "Converged!\n"); break; }
+        if(norm0 / normg < rtol*rtol){      ParsinvLog(PETSC_COMM_WORLD, "Diverged! \n"); break; }
         for(int k=0; k<4; k++)              theta[k] -= lrate * grad[k] / hess[k];
-        lrate *= drate;
-        ParsinvLog(PETSC_COMM_WORLD, "\n");
 
+        ParsinvLog(PETSC_COMM_WORLD, "\n");
         ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
     }
 
