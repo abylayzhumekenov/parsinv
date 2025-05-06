@@ -97,7 +97,7 @@ void ParsinvMatUpdate(Mat A, double alpha, Vec x, Vec y){
 }
 
 
-void ParsinvMatHadamardSparse(Mat A, Mat B, Mat C){
+void ParsinvMatHadamardSparseSeq(Mat A, Mat B, Mat C){
 
     MatInfo info;
     double *a_array, *b_array, *c_array;
@@ -109,6 +109,45 @@ void ParsinvMatHadamardSparse(Mat A, Mat B, Mat C){
     MatSeqAIJRestoreArray(A, &a_array);
     MatSeqAIJRestoreArray(B, &b_array);
     MatSeqAIJRestoreArray(C, &c_array);
+}
+
+
+void ParsinvMatHadamardSparseMPI(Mat A, Mat B, Mat C){
+
+    int n, m;
+    Mat AA, BB, CC, CCC;
+    MatGetLocalSize(A, &n, &m);
+    MatMPIAIJGetLocalMat(A, MAT_INITIAL_MATRIX, &AA);
+    MatMPIAIJGetLocalMat(B, MAT_INITIAL_MATRIX, &BB);
+    MatMPIAIJGetLocalMat(C, MAT_INITIAL_MATRIX, &CC);
+    ParsinvMatHadamardSparseSeq(AA, BB, CC);
+    MatCreateMPIMatConcatenateSeqMat(PETSC_COMM_WORLD, CC, m, MAT_INITIAL_MATRIX, &CCC);
+    MatAYPX(C, 0.0, CCC, SAME_NONZERO_PATTERN);
+    MatDestroy(&AA);
+    MatDestroy(&BB);
+    MatDestroy(&CC);
+    MatDestroy(&CCC);
+}
+
+
+void ParsinvMatHadamardDenseSeq(Mat A, Mat B, Mat C){
+
+    ParsinvMatHadamardDenseMPI(A, B, C);
+}
+
+
+void ParsinvMatHadamardDenseMPI(Mat A, Mat B, Mat C){
+
+    MatInfo info;
+    double *a_array, *b_array, *c_array;
+    MatGetInfo(A, MAT_LOCAL, &info);
+    MatDenseGetArray(A, &a_array);
+    MatDenseGetArray(B, &b_array);
+    MatDenseGetArray(C, &c_array);
+    for(int i=0; i<(int)info.nz_allocated; i++) c_array[i] = a_array[i] * b_array[i];
+    MatDenseRestoreArray(A, &a_array);
+    MatDenseRestoreArray(B, &b_array);
+    MatDenseRestoreArray(C, &c_array);
 }
 
 
@@ -137,7 +176,7 @@ void ParsinvMatSolveDense(Mat A, Mat* B){
     int i_array[n], info;
     double *b_array, work[n];
     MatDenseGetArray(*B, &b_array);
-    if(!rank){
+    if(n > 0){
         dgetrf_(&n, &n, b_array, &n, i_array, &info);
         dgetri_(&n, b_array, &n, i_array, work, &n, &info);
     }

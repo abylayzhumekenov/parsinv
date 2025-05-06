@@ -72,13 +72,43 @@ void ParsinvMatUpdate(Mat A, double alpha, Vec x, Vec y);
 
 
 /**
- * @brief Hadamard (elementwise) product of two matrices
+ * @brief Hadamard (elementwise) product of two sequential sparse matrices
  * 
  * @param A 
  * @param B 
  * @param C 
  */
-void ParsinvMatHadamardSparse(Mat A, Mat B, Mat C);
+void ParsinvMatHadamardSparseSeq(Mat A, Mat B, Mat C);
+
+
+/**
+ * @brief Hadamard (elementwise) product of two parallel sparse matrices
+ * 
+ * @param A 
+ * @param B 
+ * @param C 
+ */
+void ParsinvMatHadamardSparseMPI(Mat A, Mat B, Mat C);
+
+
+/**
+ * @brief Hadamard (elementwise) product of two sequential dense matrices
+ * 
+ * @param A 
+ * @param B 
+ * @param C 
+ */
+void ParsinvMatHadamardDenseSeq(Mat A, Mat B, Mat C);
+
+
+/**
+ * @brief Hadamard (elementwise) product of two parallel dense matrices
+ * 
+ * @param A 
+ * @param B 
+ * @param C 
+ */
+void ParsinvMatHadamardDenseMPI(Mat A, Mat B, Mat C);
 
 
 /**

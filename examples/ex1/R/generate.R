@@ -52,6 +52,7 @@ parsinv.stmodel.write(stmodel, "../data/stmodel")
 
 # save the data
 Ab = cbind(1, x)
+nb = dim(Ab)[2]
 parsinv.dense.write(Ab, "../data/Ab")
 parsinv.vec.write(y, "../data/y")
 
@@ -63,3 +64,7 @@ gmat = parsinv.gmatrices(stmodel, smesh)
 parsinv.mats.write(jmat, "../data")
 parsinv.mats.write(gmat, "../data")
 parsinv.mats.write(amat, "../data")
+
+
+# save additional info for plotting
+save(list = c("smesh", "ns", "nt", "nb"), file="data/smesh.Rdata")

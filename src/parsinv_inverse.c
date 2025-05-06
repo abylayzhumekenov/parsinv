@@ -203,19 +203,52 @@ void ParsinvInverseMatCorrect(KSP ksp, IS is_sub, Mat B, int n_samples, ParsinvR
 }
 
 
-void ParsinvInverseMatMatTrace(Mat A, Mat B, Mat C, IS is_over, double* trace){
+void ParsinvInverseMatMatTraceSparseSeq(Mat A, Mat B, Mat C, IS is_over, double* trace){
 
     Vec c;
     int ok = 0;
     double sum = 0;
 
-    ParsinvMatHadamardSparse(A, B, C);
+    ParsinvMatHadamardSparseSeq(A, B, C);
     MatCreateVecs(C, &c, NULL);
     MatGetRowSum(C, c);
     VecISSet(c, is_over, 0.0);
     VecSum(c, &sum);
     VecDestroy(&c);
     ok += MPI_Allreduce(&sum, trace, 1, MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
+}
+
+
+void ParsinvInverseMatDiagonalSparseSeq(Mat A, IS is_over, Vec x){
+
+    int n;
+    double *b_array, *x_array;
+    Vec a, b;
+    IS is_full, is_inner;
+    
+    MatCreateVecs(A, &a, NULL);
+    MatGetDiagonal(A, a);
+    MatGetOwnershipIS(A, &is_full, NULL);
+    ISDifference(is_full, is_over, &is_inner);
+    ISGetSize(is_inner, &n);
+    VecGetSubVector(a, is_inner, &b);
+    VecGetArray(b, &b_array);
+    VecGetArray(x, &x_array);
+    for(int i=0; i<n; i++) x_array[i] = b_array[i];
+    VecRestoreArray(x, &x_array);
+    VecRestoreArray(b, &b_array);
+    VecRestoreSubVector(a, is_inner, &b);
+        
+    VecDestroy(&a);
+    ISDestroy(&is_full);
+    ISDestroy(&is_inner);
+}
+
+
+void ParsinvInverseMatMatDiagonalDenseMPI(Mat A, Mat B, Mat C, Vec x){
+
+    ParsinvMatHadamardDenseMPI(A, B, C);
+    MatGetRowSum(C, x);
 }
 
 

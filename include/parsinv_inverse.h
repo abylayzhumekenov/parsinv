@@ -27,7 +27,13 @@ void ParsinvInverseMatInvert(KSP ksp, Mat B);
 void ParsinvInverseMatCorrect(KSP ksp, IS is_sub, Mat B, int n_samples, ParsinvRandom* rng);
 
 
-void ParsinvInverseMatMatTrace(Mat A, Mat B, Mat C, IS is_over, double* trace);
+void ParsinvInverseMatMatTraceSparseSeq(Mat A, Mat B, Mat C, IS is_over, double* trace);
+
+
+void ParsinvInverseMatDiagonalSparseSeq(Mat A, IS is_over, Vec x);
+
+
+void ParsinvInverseMatMatDiagonalDenseMPI(Mat A, Mat B, Mat C, Vec x);
 
 
 void ParsinvInverseMatSolve(KSP ksp_postr, 

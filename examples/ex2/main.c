@@ -265,8 +265,8 @@ int main(int argc, char** argv){
             ParsinvAssembleQub_prior(Qub_prior_);
             ParsinvAssembleQbb_prior(Qbb_prior_);
             ParsinvInverseKSPSetUp(ksp_prior_);
-            ParsinvInverseMatMatTrace(Cuu_prior_sub, Quu_prior_sub_, Cuu_prior_sub_, is_over, &work[6]);
-            ParsinvInverseMatMatTrace(Wuu_prior_sub, Quu_prior_sub_, Cuu_prior_sub_, is_over, &work[14]);
+            ParsinvInverseMatMatTraceSparseSeq(Cuu_prior_sub, Quu_prior_sub_, Cuu_prior_sub_, is_over, &work[6]);
+            ParsinvInverseMatMatTraceSparseSeq(Wuu_prior_sub, Quu_prior_sub_, Cuu_prior_sub_, is_over, &work[14]);
 
             /* POSTERIOR */
             ParsinvAssembleQuu_postr(Muu, theta, manifold, Quu_postr_);
@@ -280,8 +280,8 @@ int main(int argc, char** argv){
             ParsinvVecMatVec(Quu_postr_, xu_, xu_, wu, &work[7]);
             ParsinvVecMatVec(Qub_postr_, xu_, xb_, wu, &work[8]);
             ParsinvVecMatVec(Qbb_postr_, xb_, xb_, wb, &work[9]);
-            ParsinvInverseMatMatTrace(Cuu_postr_sub, Quu_postr_sub_, Cuu_postr_sub_, is_over, &work[10]);
-            ParsinvInverseMatMatTrace(Wuu_postr_sub, Quu_postr_sub_, Cuu_postr_sub_, is_over, &work[15]);
+            ParsinvInverseMatMatTraceSparseSeq(Cuu_postr_sub, Quu_postr_sub_, Cuu_postr_sub_, is_over, &work[10]);
+            ParsinvInverseMatMatTraceSparseSeq(Wuu_postr_sub, Quu_postr_sub_, Cuu_postr_sub_, is_over, &work[15]);
             
             /* HYPERPRIOR */
             ParsinvHyperparPrior(theta, manifold, &work[11]);
@@ -305,7 +305,7 @@ int main(int argc, char** argv){
             ParsinvAssembleQbb_prior(Qbb_prior_);
             ParsinvInverseKSPSetUp(ksp_prior_);
             ParsinvInverseMatInvert(ksp_prior_, Cuu_prior_sub_);
-            ParsinvInverseMatMatTrace(Cuu_prior_sub_, Quu_prior_sub, Wuu_prior_sub_, is_over, &work[6]);
+            ParsinvInverseMatMatTraceSparseSeq(Cuu_prior_sub_, Quu_prior_sub, Wuu_prior_sub_, is_over, &work[6]);
 
             /* POSTERIOR */
             ParsinvAssembleQuu_postr(Muu, theta, manifold, Quu_postr_);
@@ -320,7 +320,7 @@ int main(int argc, char** argv){
             ParsinvVecMatVec(Quu_postr_, xu_, xu_, wu, &work[7]);
             ParsinvVecMatVec(Qub_postr_, xu_, xb_, wu, &work[8]);
             ParsinvVecMatVec(Qbb_postr_, xb_, xb_, wb, &work[9]);
-            ParsinvInverseMatMatTrace(Cuu_postr_sub_, Quu_postr_sub, Wuu_postr_sub_, is_over, &work[10]);
+            ParsinvInverseMatMatTraceSparseSeq(Cuu_postr_sub_, Quu_postr_sub, Wuu_postr_sub_, is_over, &work[10]);
             
             /* HYPERPRIOR */
             ParsinvHyperparPrior(theta, manifold, &work[11]);

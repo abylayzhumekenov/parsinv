@@ -257,8 +257,8 @@ int main(int argc, char** argv){
             ParsinvAssembleQub_prior(Qub_prior_);
             ParsinvAssembleQbb_prior(Qbb_prior_);
             ParsinvInverseKSPSetUp(ksp_prior_);
-            ParsinvInverseMatMatTrace(Cuu_prior_sub, Quu_prior_sub_, Cuu_prior_sub_, is_over, &work[6]);
-            ParsinvInverseMatMatTrace(Wuu_prior_sub, Quu_prior_sub_, Cuu_prior_sub_, is_over, &work[14]);
+            ParsinvInverseMatMatTraceSparseSeq(Cuu_prior_sub, Quu_prior_sub_, Cuu_prior_sub_, is_over, &work[6]);
+            ParsinvInverseMatMatTraceSparseSeq(Wuu_prior_sub, Quu_prior_sub_, Cuu_prior_sub_, is_over, &work[14]);
 
             /* POSTERIOR */
             ParsinvAssembleQuu_postr(Muu, theta, manifold, Quu_postr_);
@@ -272,8 +272,8 @@ int main(int argc, char** argv){
             ParsinvVecMatVec(Quu_postr_, xu_, xu_, wu, &work[7]);
             ParsinvVecMatVec(Qub_postr_, xu_, xb_, wu, &work[8]);
             ParsinvVecMatVec(Qbb_postr_, xb_, xb_, wb, &work[9]);
-            ParsinvInverseMatMatTrace(Cuu_postr_sub, Quu_postr_sub_, Cuu_postr_sub_, is_over, &work[10]);
-            ParsinvInverseMatMatTrace(Wuu_postr_sub, Quu_postr_sub_, Cuu_postr_sub_, is_over, &work[15]);
+            ParsinvInverseMatMatTraceSparseSeq(Cuu_postr_sub, Quu_postr_sub_, Cuu_postr_sub_, is_over, &work[10]);
+            ParsinvInverseMatMatTraceSparseSeq(Wuu_postr_sub, Quu_postr_sub_, Cuu_postr_sub_, is_over, &work[15]);
             
             /* HYPERPRIOR */
             ParsinvHyperparPrior(theta, manifold, &work[11]);
@@ -297,7 +297,7 @@ int main(int argc, char** argv){
             ParsinvAssembleQbb_prior(Qbb_prior_);
             ParsinvInverseKSPSetUp(ksp_prior_);
             ParsinvInverseMatInvert(ksp_prior_, Cuu_prior_sub_);
-            ParsinvInverseMatMatTrace(Cuu_prior_sub_, Quu_prior_sub, Wuu_prior_sub_, is_over, &work[6]);
+            ParsinvInverseMatMatTraceSparseSeq(Cuu_prior_sub_, Quu_prior_sub, Wuu_prior_sub_, is_over, &work[6]);
 
             /* POSTERIOR */
             ParsinvAssembleQuu_postr(Muu, theta, manifold, Quu_postr_);
@@ -312,7 +312,7 @@ int main(int argc, char** argv){
             ParsinvVecMatVec(Quu_postr_, xu_, xu_, wu, &work[7]);
             ParsinvVecMatVec(Qub_postr_, xu_, xb_, wu, &work[8]);
             ParsinvVecMatVec(Qbb_postr_, xb_, xb_, wb, &work[9]);
-            ParsinvInverseMatMatTrace(Cuu_postr_sub_, Quu_postr_sub, Wuu_postr_sub_, is_over, &work[10]);
+            ParsinvInverseMatMatTraceSparseSeq(Cuu_postr_sub_, Quu_postr_sub, Wuu_postr_sub_, is_over, &work[10]);
             
             /* HYPERPRIOR */
             ParsinvHyperparPrior(theta, manifold, &work[11]);
@@ -352,13 +352,38 @@ int main(int argc, char** argv){
     }
 
 
-    // PetscViewerBinaryOpen(PETSC_COMM_WORLD, "data/xu", FILE_MODE_WRITE, &viewer);
-    // VecView(xu, viewer);
-    // PetscViewerBinaryOpen(PETSC_COMM_WORLD, "data/xb", FILE_MODE_WRITE, &viewer);
-    // VecView(xb, viewer);
+    /* Save results */
+    Vec theta_vec, su, sb;
+    MatCreateVecs(Quu_postr, &su, NULL);
+    MatCreateVecs(Cbb_postr, &sb, NULL);
+    
+    if(!rank){
+        VecCreateSeqWithArray(PETSC_COMM_SELF, 1, 4, theta, &theta_vec);
+        PetscViewerBinaryOpen(PETSC_COMM_SELF, "R/data/theta", FILE_MODE_WRITE, &viewer);
+        VecView(theta_vec, viewer);
+    }
 
+    PetscViewerBinaryOpen(PETSC_COMM_WORLD, "R/data/muu", FILE_MODE_WRITE, &viewer);
+    VecView(xu, viewer);
+    PetscViewerBinaryOpen(PETSC_COMM_WORLD, "R/data/mub", FILE_MODE_WRITE, &viewer);
+    VecView(xb, viewer);
+    
+    MatGetDiagonal(Cbb_postr, sb);
+    VecPow(sb, 0.5);
+    PetscViewerBinaryOpen(PETSC_COMM_WORLD, "R/data/sdb", FILE_MODE_WRITE, &viewer);
+    VecView(sb, viewer);
+    
+    MatMatMult(Sub_postr, Cbb_postr, MAT_REUSE_MATRIX, PETSC_DEFAULT, &Wub);
+    ParsinvMatHadamardDenseMPI(Sub_postr, Wub, Sub_postr_);
+    ParsinvInverseMatMatDiagonalDenseMPI(Sub_postr, Wub, Sub_postr_, wu);
+    MatAXPY(Cuu_postr_sub, 1.0, Wuu_postr_sub, SAME_NONZERO_PATTERN);
+    ParsinvInverseMatDiagonalSparseSeq(Cuu_postr_sub, is_over, su);
+    VecAXPY(su, 1.0, wu);
+    VecPow(su, 0.5);
+    PetscViewerBinaryOpen(PETSC_COMM_WORLD, "R/data/sdu", FILE_MODE_WRITE, &viewer);
+    VecView(su, viewer);
 
-
+    /* Finalize */
     PetscFinalize();
     MPI_Finalize();
 

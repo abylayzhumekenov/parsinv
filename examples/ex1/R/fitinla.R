@@ -39,3 +39,11 @@ result = bru(model,
                             control.inla = list(int.strategy = "eb"),
                             control.fixed = list(prec = list(prec = 1e-5, prec.intercept = 1e-5))))
 print(unname(result$misc$configs$config[[1]]$theta[c(2:4,1)]))
+
+# save results
+theta.inla = unname(result$misc$configs$config[[1]]$theta[c(2:4,1)])
+muu.inla = result$summary.random$field$mean
+mub.inla = result$summary.fixed$mean
+sdu.inla = result$summary.random$field$sd
+sdb.inla = result$summary.fixed$sd
+save(list = c("theta.inla", "muu.inla", "mub.inla", "sdu.inla", "sdb.inla"), file="data/inla.Rdata")
