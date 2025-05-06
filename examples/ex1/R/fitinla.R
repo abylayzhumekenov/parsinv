@@ -10,7 +10,7 @@ for(i in seq_along(args)){
     if(args[i] == "-ns") ns = as.integer(args[i+1])
 }
 if(!exists(deparse(substitute(ns)))) ns = 12
-if(!exists(deparse(substitute(nt)))) nt = 2
+if(!exists(deparse(substitute(nt)))) nt = 4
 source("generate.R")
 
 

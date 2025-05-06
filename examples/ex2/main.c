@@ -3,9 +3,15 @@
 
 
 /**
- * @brief Run example 1
+ * @brief Run example 2
  * 
- * Good parameter values: -lr 0.1
+ * Good parameter values: -lr 1 -dp 0.8 -nr 5 -rt 1e-5 -hh 1 1 1 0
+ * In general, lr should be proportional to the number of samples,
+ * but divided by a sufficiently large number.
+ * 
+ * @note optima:
+ * theta1 = (1.059116,  1.160690,  5.891934, -2.221491) # hessian is pd
+ * theta2 = (0.815177, -0.175251, -0.507259, -3.572368) # not pd
  * 
  * @param argc 
  * @param argv 
@@ -39,19 +45,19 @@ int main(int argc, char** argv){
 
     ParsinvManifold manifold = PARSINV_MANIFOLD_S2;
     int n_over = 1;
-    int n_iter = 1000;
+    int n_iter = 100;
     int n_samples = 10;
-    int n_restart = n_iter;
+    int n_restart = 1000;
     int use_gd = 0;
-    double lrate0   = 0.1;
-    double lrate    = 0.1;
+    double lrate0   = 0.5;
+    double lrate    = lrate0;
     double drate    = 1.0;
     double dpoly    = 0.0;
-    double epsilon  = 0.05;
+    double epsilon  = 5e-3;
     double norm0    = 1.0;
     double normg    = 0.0;
-    double rtol     = 1e-2;
-    double atol     = 1e-2;
+    double rtol     = 1e-3;
+    double atol     = 1e-3;
     double theta[4] = {0, 0, 0, 0};
     double grad [4] = {0, 0, 0, 0};
     double hess [4] = {0, 0, 0, 0};
@@ -195,6 +201,20 @@ int main(int argc, char** argv){
     MatCreateVecs(Qyy, &wy, NULL);
 
     ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
+    ParsinvLog(PETSC_COMM_WORLD, "Starting optimizer with options:\n"
+                                "-ni %i\n"
+                                "-ns %i\n"
+                                "-no %i\n"
+                                "-nr %i\n"
+                                "-gd %i\n"
+                                "-lr %f\n"
+                                "-dr %f\n"
+                                "-dp %f\n"
+                                "-ee %f\n"
+                                "-rt %f\n"
+                                "-at %f\n"
+                                "-hh %f %f %f %f\n\n", 
+        n_iter, n_samples, n_over, n_restart, use_gd, lrate0, drate, dpoly, epsilon, rtol, atol, theta[0], theta[1], theta[2], theta[3]);
 
     // ---------------------------------------------------------------------------------------
 
@@ -311,8 +331,9 @@ int main(int argc, char** argv){
                         (work[4] - work[11])) / epsilon;                                                    // hypeprior
             hess[k] = (grad[k] - hess[k]) / epsilon;                        // form hessian from two gradients
             hess[k] = (hess[k] < -1.0) ? hess[k] : -1.0;                    // use gradient descent if negative hess is not PSD
-            hess[k] = hess[k] * (!use_gd) - 1.0 * (use_gd);                         // use gradient ascent if gd = 1
+            hess[k] = (!use_gd)        ? hess[k] : -1.0;                    // use gradient ascent if gd = 1
             grad[k] += (work[14] + work[15]) / 2.0 / epsilon;               // correction part
+            hess[k] = (fabs(grad[k] / hess[k]) < 1.0) ? hess[k] : -ceil(fabs(grad[k]));   // limit the update magnitude
             
             theta[k] += epsilon;
         }
@@ -323,6 +344,7 @@ int main(int argc, char** argv){
         if(dpoly > 0.5)                     lrate = pow(iter%n_restart+1, -dpoly) * lrate0;
         else                                lrate = pow(drate, iter%n_restart) * lrate0;
 
+        ParsinvLog(PETSC_COMM_WORLD, "theta\t\tgrad\t\thess\n");
         for(int k=0; k<4; k++)              ParsinvLog(PETSC_COMM_WORLD, "%f\t%f\t%f\n", theta[k], grad[k], hess[k]);
         ParsinvLog(PETSC_COMM_WORLD, "Abs |g|:\t%f\n", pow(normg, 0.5));
         ParsinvLog(PETSC_COMM_WORLD, "Rel |g|:\t%f\n", pow(normg / norm0, 0.5));
