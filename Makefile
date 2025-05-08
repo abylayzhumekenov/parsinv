@@ -1,5 +1,5 @@
 CC = mpicc
-CFLAGS = -g -Wall -fPIC -O1 -DDEBUG
+CFLAGS = -g -Wall -fPIC -O1 -DDEBUG -std=c99
 TFLAGS = -shared
 
 INC = include

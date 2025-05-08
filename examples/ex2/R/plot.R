@@ -3,6 +3,7 @@ suppressMessages(suppressWarnings(library(INLA)))
 library(ggplot2)
 library(maps)
 library(mapdata)
+library(sp)
 library(INLA)
 source("parsinv.petsc.io.R")
 
