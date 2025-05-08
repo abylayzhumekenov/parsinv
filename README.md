@@ -90,7 +90,6 @@ Compile examples in subfolders by changing working directory `cd examples/ex#` a
 
 Generate necessary data for examples by further changing the directory `cd R` and 
 running `Rscript generate.R [rscript_options]` with the following options
-
 * `-ns` latent spatial size
 * `-nt` latent temporal size
 * `-ms` data spatial size
@@ -104,6 +103,13 @@ where the first 64 bits (PETSc header) can be ignored. Note that on linux machin
 this must be taken into account when reading and writing binary files.
 
 You can run `fitinla.R` script with the same options to approximate hyperparameters for small to medium sized examples.
+
+The R scripts depend on several packages that need to be installed:
+* `fmesher`
+* `R-INLA`
+* `inlabru`
+* `INLAspacetime`
+* `mapdata`
 
 
 ## Run with options
