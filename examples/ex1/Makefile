@@ -1,5 +1,5 @@
 CC = mpicc
-CFLAGS = -g -Wall -fopenmp
+CFLAGS = -g -Wall -fopenmp -std=c99
 
 INC = ../../include
 LIB = ../../lib
