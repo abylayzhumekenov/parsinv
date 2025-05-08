@@ -27,7 +27,7 @@ source("generate.R")
 
 # define a model using INLAspacetime
 data = list(xcoord = rep(sloc[,1], nt), ycoord = rep(sloc[,2], nt), time = rep(1:nt, each=ms), 
-            elevation = Ab[,2], northing = Ab[,3], sin = Ab[,4], cos = Ab[,5])
+            elevation = Ab[,2], northing = Ab[,3], sin = Ab[,4], cos = Ab[,5], y = y)
 model = y ~ -1 + Intercept(1) + elevation + northing + sin + cos + 
     field(list(space = cbind(xcoord, ycoord), time = time), model = model.st)
 model.st = stModel.define(smesh, tmesh, "121",

@@ -45,7 +45,7 @@ zlim.sdu = range(sdu.parsinv[1:(ns*nt)])
 
 
 # plot several slices
-tt = 60:63
+tt = 1:4
 pdf("data/fig.app.1.pdf", width=14, height=5)
 par(mfcol=c(2,length(tt)), mar=c(2,2,0,0))
 for(i in seq_along(tt)){

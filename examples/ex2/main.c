@@ -43,7 +43,7 @@ int main(int argc, char** argv){
     int nu_t_local, nu_local;
     int ny_t_local, ny_local;
 
-    ParsinvManifold manifold = PARSINV_MANIFOLD_S2;
+    ParsinvManifold manifold = PARSINV_MANIFOLD_R2;
     int n_over = 1;
     int n_iter = 100;
     int n_samples = 10;
