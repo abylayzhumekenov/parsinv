@@ -6,7 +6,8 @@
 #SBATCH --mail-type=ALL
 #SBATCH --partition=workq
 #SBATCH --constraint=intel
-#SBATCH --ntasks=40
+#SBATCH --nodes=10
+#SBATCH --ntasks=200
 #SBATCH --ntasks-per-node=20
 #SBATCH --ntasks-per-socket=10
 #SBATCH --ntasks-per-core=1
@@ -25,4 +26,4 @@ module load mpi
 export OMP_NUM_THREADS=1
 
 #run the application:
-srun ./main -lr 1.0 -dr 0.8 -nr 10
+srun ./main -ni 1000 -lr 1.0 -dr 0.8 -nr 10
