@@ -14,8 +14,8 @@ for(i in seq_along(args)){
     if(args[i] == "-res2") res2 = as.double(args[i+1])
     if(args[i] == "-res3") res3 = as.double(args[i+1])
 }
-if(!exists(deparse(substitute(ns)))) ms = 10
-if(!exists(deparse(substitute(nt)))) mt = 4
+if(!exists(deparse(substitute(ns)))) ms = 1000
+if(!exists(deparse(substitute(nt)))) mt = 10
 if(!exists(deparse(substitute(res1)))) res1 = 200
 if(!exists(deparse(substitute(res2)))) res2 = 500
 if(!exists(deparse(substitute(res3)))) res3 = 1000
@@ -48,3 +48,11 @@ result = bru(model,
                             control.inla = list(int.strategy = "eb"),
                             control.fixed = list(prec = list(prec = 1e-5, prec.intercept = 1e-5))))
 print(unname(result$misc$configs$config[[1]]$theta[c(2:4,1)]))
+
+# save results
+theta.inla = unname(result$misc$configs$config[[1]]$theta[c(2:4,1)])
+muu.inla = result$summary.random$field$mean
+mub.inla = result$summary.fixed$mean
+sdu.inla = result$summary.random$field$sd
+sdb.inla = result$summary.fixed$sd
+save(list = c("theta.inla", "muu.inla", "mub.inla", "sdu.inla", "sdb.inla"), file="data/inla.Rdata")

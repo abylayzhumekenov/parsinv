@@ -1,4 +1,5 @@
 # load the saved data
+library(INLA)
 source("parsinv.petsc.io.R")
 load("data/smesh.Rdata")
 load("data/inla.Rdata")
@@ -17,7 +18,10 @@ coords.cartesian = data.frame(x = sin(coords.spherical$Var2) * cos(coords.spheri
                               z = cos(coords.spherical$Var2))
 A.spherical = inla.spde.make.A(smesh, as.matrix(coords.cartesian))
 
-for(t in 1:nt){
+# plot the latent field
+# for(t in 1:nt){
+t = 25
+  
   # project the mean
   muu.inla.spherical = drop(A.spherical %*% muu.inla[1:ns+(t-1)*ns])
   muu.inla.spherical = matrix(muu.inla.spherical, plot.res[1])
@@ -35,6 +39,7 @@ for(t in 1:nt){
   zlim.sdu = range(sdu.inla.spherical, sdu.parsinv.spherical)
   
   # plot the spatial field
+  pdf(paste0("data/fig.sim.1.", t, ".pdf"), width=9, height=5)
   par(mfrow=c(2,2), mar=c(2,2,1,1))
   image(muu.inla.spherical, col=viridisLite::viridis(100), asp=plot.asp, zlim=zlim.muu, xaxt="n", yaxt="n", axes=FALSE)
   title(ylab="Mean", line=1)
@@ -43,4 +48,15 @@ for(t in 1:nt){
   title(xlab="R-INLA", ylab="SD", line=1)
   image(sdu.parsinv.spherical, col=viridisLite::inferno(100), asp=plot.asp, zlim=zlim.sdu, xaxt="n", yaxt="n", axes=FALSE)
   title(xlab="Ovelapping RBMC", line=1)
-}
+  dev.off()
+# }
+
+
+error = colSums(matrix(sdu.parsinv/sdu.inla-1, ns)^2)^0.5
+pdf(paste0("data/fig.sim.2.pdf"), width=5, height=5)
+par(mfrow=c(1,1), mar=c(2,2,1.1,1))
+plot(error, t="l", xlab=NA, ylab=NA, xaxt="n", yaxt="n", axes=FALSE)
+axis(1, at=seq(0,nt,length=5)*c(1,1,NA,1,1), col="gray")
+axis(2, at=seq(0,signif(max(error),1),length=2), col="gray")
+title(xlab="Time", ylab="Error norm", line=1)
+dev.off()

@@ -11,9 +11,11 @@ args = commandArgs(trailingOnly=FALSE)
 for(i in seq_along(args)){
     if(args[i] == "-nt") nt = as.integer(args[i+1])
     if(args[i] == "-ns") ns = as.integer(args[i+1])
+    if(args[i] == "-ks") ks = as.integer(args[i+1])
 }
 if(!exists(deparse(substitute(ns)))) ns = 12
 if(!exists(deparse(substitute(nt)))) nt = 4
+if(!exists(deparse(substitute(ks)))) ks = 5
 res = round(sqrt((ns-2)/10))
 
 
@@ -29,7 +31,7 @@ ns = smesh$n
 
 # simulate locations
 set.seed(1)
-ms = 10*ns
+ms = ks*ns
 sloc = matrix(rnorm(ms*3), ms)
 sloc = sloc / sqrt(rowSums(sloc^2))
 amat = parsinv.amatrices(tmesh, smesh, NULL, sloc)

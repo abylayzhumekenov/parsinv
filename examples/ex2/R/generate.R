@@ -17,6 +17,7 @@ suppressMessages(suppressWarnings(library(INLA)))
 source("getdata.R")
 detach("package:data.table", unload = TRUE)
 rm(list = setdiff(ls(), c("wdat", "stations", "ns", "nt", "ms", "mt", "res1", "res2", "res3")))
+gc()
 
 # load libraries and helper functions
 library(INLA)
@@ -27,8 +28,8 @@ source("parsinv.petsc.io.R")
 set.seed(1)
 
 # set mesh resolution and data dimensions
-if(!exists(deparse(substitute(res1)))) res1 = 100
-if(!exists(deparse(substitute(res2)))) res2 = 200
+if(!exists(deparse(substitute(res1)))) res1 = 200
+if(!exists(deparse(substitute(res2)))) res2 = 500
 if(!exists(deparse(substitute(res3)))) res3 = 1000
 if(!exists(deparse(substitute(ms)))) ms = dim(wdat)[1]
 if(!exists(deparse(substitute(mt)))) mt = dim(wdat)[2]-1
@@ -82,3 +83,6 @@ cat("ms = ", ms, "\n",
     "nt = ", nt, "\n",
     "nb = ", nb, "\n",
     sep="")
+
+# save additional info for plotting
+save(list = c("smesh", "bound", "ns", "nt", "nb"), file="data/smesh.Rdata")

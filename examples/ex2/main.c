@@ -359,6 +359,39 @@ int main(int argc, char** argv){
         ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
     }
 
+    
+    /* Save results */
+    Vec theta_vec, su, sb;
+    MatCreateVecs(Quu_postr, &su, NULL);
+    MatCreateVecs(Cbb_postr, &sb, NULL);
+    
+    if(!rank){
+        VecCreateSeqWithArray(PETSC_COMM_SELF, 1, 4, theta, &theta_vec);
+        PetscViewerBinaryOpen(PETSC_COMM_SELF, "R/data/theta", FILE_MODE_WRITE, &viewer);
+        VecView(theta_vec, viewer);
+    }
+
+    PetscViewerBinaryOpen(PETSC_COMM_WORLD, "R/data/muu", FILE_MODE_WRITE, &viewer);
+    VecView(xu, viewer);
+    PetscViewerBinaryOpen(PETSC_COMM_WORLD, "R/data/mub", FILE_MODE_WRITE, &viewer);
+    VecView(xb, viewer);
+    
+    MatGetDiagonal(Cbb_postr, sb);
+    VecPow(sb, 0.5);
+    PetscViewerBinaryOpen(PETSC_COMM_WORLD, "R/data/sdb", FILE_MODE_WRITE, &viewer);
+    VecView(sb, viewer);
+    
+    MatMatMult(Sub_postr, Cbb_postr, MAT_REUSE_MATRIX, PETSC_DEFAULT, &Wub);
+    ParsinvMatHadamardDenseMPI(Sub_postr, Wub, Sub_postr_);
+    ParsinvInverseMatMatDiagonalDenseMPI(Sub_postr, Wub, Sub_postr_, wu);
+    MatAXPY(Cuu_postr_sub, 1.0, Wuu_postr_sub, SAME_NONZERO_PATTERN);
+    ParsinvInverseMatDiagonalSparseSeq(Cuu_postr_sub, is_over, su);
+    VecAXPY(su, 1.0, wu);
+    VecPow(su, 0.5);
+    PetscViewerBinaryOpen(PETSC_COMM_WORLD, "R/data/sdu", FILE_MODE_WRITE, &viewer);
+    VecView(su, viewer);
+
+    /* Finalize */
     PetscFinalize();
     MPI_Finalize();
 
