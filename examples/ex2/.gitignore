@@ -4,4 +4,5 @@
 !/Makefile
 !/main.c
 !/job.sh
+!/job_test.sh
 !/.gitignore
