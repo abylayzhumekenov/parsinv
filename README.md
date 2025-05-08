@@ -130,11 +130,11 @@ Program options:
 * `-at` gradient norm absolute tolerance (`default 1e-3`)
 * `-hh` initial hyperparameters (4 values) (`default 0.0 0.0 0.0 0.0`)
 
-Some remarks. 
+Some remarks:
 * In general, `lr` should be proportional to the number of samples `ns`, but divided by a sufficiently large constant.
 If `ns` is small, the variance of the gradient becomes large, and the optimizer will often overshoot. Therefore, one should consider
 choosing smaller learning rate `lr` or introduce a decay with `dr` and `dp`.
 * The scheduled learning rate is achieved via decay parameter `dr` (or `dp`) and the restart time `nr`.
 * The optimizer automatically switches to gradient ascent/descent update if the Hessian is not negative/positive definite or too small.
-* To prevent jumping on bad values randomly, each update is limited to have a magnitude equal to `lr`. Therefore, restarting might be beneficial at later stages.
+* To prevent jumping on bad values randomly, update in each direction is limited to have a magnitude equal to `lr`. Therefore, restarting might be beneficial at later stages.
 
