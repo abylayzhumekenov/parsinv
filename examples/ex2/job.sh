@@ -26,4 +26,4 @@ module load mpi
 export OMP_NUM_THREADS=1
 
 #run the application:
-srun ./main -ni 1000 -lr 1.0 -dr 0.8 -nr 10
+srun ./main -ni 100 -lr 1.0 -dr 0.8 -nr 10
