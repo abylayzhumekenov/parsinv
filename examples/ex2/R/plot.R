@@ -45,7 +45,7 @@ zlim.sdu = range(sdu.parsinv[1:(ns*nt)])
 
 
 # plot several slices
-tt = 1:4
+tt = c(21, 22, 365, 4383)
 pdf("data/fig.app.1.pdf", width=14, height=5)
 par(mfcol=c(2,length(tt)), mar=c(2,2,0,0))
 for(i in seq_along(tt)){
@@ -69,4 +69,19 @@ for(i in seq_along(tt)){
   if(i==1) title(ylab="SD", line=1)
   title(xlab=paste0("t = ", t), line = 1)
 }
+dev.off()
+
+n_col = 100
+pdf("data/fig.app.1.colorbar.pdf", width=1, height=5)
+par(mfcol=c(2,1), mar=c(2,2.5,1,1))
+image(x = 1, 
+      y = seq(zlim.muu[1], zlim.muu[2], length=n_col), 
+      z = matrix(seq(zlim.muu[1], zlim.muu[2], length=n_col), nrow=1),
+      col = viridisLite::viridis(n_col), axes=FALSE, xlab=NA, ylab=NA)
+axis(side=2, tick=FALSE, at=zlim.muu, line=-1, labels=round(zlim.muu, 1), las=1)
+image(x = 1, 
+      y = seq(zlim.sdu[1], zlim.sdu[2], length=n_col), 
+      z = matrix(seq(zlim.sdu[1], zlim.sdu[2], length=n_col), nrow=1), 
+      col = viridisLite::inferno(n_col), axes=FALSE, xlab=NA, ylab=NA)
+axis(side=2, tick=FALSE, at=zlim.sdu, line=-1, labels=round(zlim.sdu, 1), las=1)
 dev.off()
