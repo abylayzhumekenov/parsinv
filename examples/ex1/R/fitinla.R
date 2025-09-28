@@ -22,11 +22,11 @@ data = list(xcoord = rep(sloc[,1], nt), ycoord = rep(sloc[,2], nt), zcoord = rep
             time = rep(1:nt, each=ms), x = x, y = y)
 model = y ~ -1 + Intercept(1) + x + field(list(space = cbind(xcoord, ycoord, zcoord), time = time), model = model.st)
 model.st = stModel.define(smesh, tmesh, "121",
-                          control.priors = list(prs    = c(1.00, 0.00),
-                                                prt    = c(10.0, 0.00),
-                                                psigma = c(1.00, 0.00)))  
+                          control.priors = list(prs    = c(1.00, 0.01),
+                                                prt    = c(10.0, 0.01),
+                                                psigma = c(1.00, 0.01)))  
                           # in original scale; change to c(1.00, 0.01) to optimize theta
-lkprec = list(prec = list(initial = 1.00, fixed = TRUE, prior = "pc.prec", param = c(1.00, 0.01)))
+lkprec = list(prec = list(initial = 1.00, fixed = FALSE, prior = "pc.prec", param = c(1.00, 0.01)))
                           # in log scale; change to fixed = FALSE to optimize theta
 
 # fit using INLA

@@ -231,10 +231,8 @@ int main(int argc, char** argv){
         ParsinvAssembleQub_postr(Mub, theta, Qub_postr);
         ParsinvAssembleQbb_postr(Mbb, theta, Qbb_postr);
         ParsinvInverseKSPSetUp(ksp_postr);
-            ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
         ParsinvInverseMatInvert(ksp_postr, Cuu_postr_sub);
         ParsinvInverseMatCorrect(ksp_postr, is_sub, Wuu_postr_sub, n_samples, &rng);
-            ParsinvCheckpoint(PETSC_COMM_WORLD, &time, &memory);
         ParsinvMatSchur(ksp_postr, Quu_postr, Qub_postr, Qbb_postr, Sub_postr, &Sbb_postr);
         ParsinvMatSolveDense(Sbb_postr, &Cbb_postr);
         ParsinvInverseMatSolve(ksp_postr, Qyy, Qub_postr, Auy, Ayb, Cbb_postr, 
