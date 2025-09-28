@@ -55,7 +55,7 @@ t = 25
 error = colSums(matrix(sdu.parsinv/sdu.inla-1, ns)^2)^0.5
 pdf(paste0("data/fig.sim.2.pdf"), width=5, height=5)
 par(mfrow=c(1,1), mar=c(2,2,1.1,1))
-plot(error, t="l", xlab=NA, ylab=NA, xaxt="n", yaxt="n", axes=FALSE)
+plot(error, t="l", lwd=1.5, col=rgb(0.1,0.5,0.9,1), xlab=NA, ylab=NA, xaxt="n", yaxt="n", axes=FALSE)
 axis(1, at=seq(0,nt,length=5)*c(1,1,NA,1,1), col="gray")
 axis(2, at=seq(0,signif(max(error),1),length=2), col="gray")
 title(xlab="Time", ylab="Error norm", line=1)
