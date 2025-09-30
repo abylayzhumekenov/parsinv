@@ -60,3 +60,18 @@ axis(1, at=seq(0,nt,length=5)*c(1,1,NA,1,1), col="gray")
 axis(2, at=seq(0,signif(max(error),1),length=2), col="gray")
 title(xlab="Time", ylab="Error norm", line=1)
 dev.off()
+
+n_col = 100
+pdf("data/fig.sim.1.colorbar.pdf", width=1, height=5)
+par(mfcol=c(2,1), mar=c(2,2.5,1,1))
+image(x = 1, 
+      y = seq(zlim.muu[1], zlim.muu[2], length=n_col), 
+      z = matrix(seq(zlim.muu[1], zlim.muu[2], length=n_col), nrow=1),
+      col = viridisLite::viridis(n_col), axes=FALSE, xlab=NA, ylab=NA)
+axis(side=2, tick=FALSE, at=zlim.muu, line=-1, labels=round(zlim.muu, 1), las=1)
+image(x = 1, 
+      y = seq(zlim.sdu[1], zlim.sdu[2], length=n_col), 
+      z = matrix(seq(zlim.sdu[1], zlim.sdu[2], length=n_col), nrow=1), 
+      col = viridisLite::inferno(n_col), axes=FALSE, xlab=NA, ylab=NA)
+axis(side=2, tick=FALSE, at=zlim.sdu, line=-1, labels=round(zlim.sdu, 1), las=1)
+dev.off()

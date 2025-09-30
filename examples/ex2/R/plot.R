@@ -40,7 +40,7 @@ grid.A = inla.spde.make.A(mesh = smesh, loc = grid.loc)
 
 # set the plot range
 zlim.muu = range(muu.parsinv[1:(ns*nt)])
-zlim.sdu = range(sdu.parsinv[1:(ns*nt)])
+zlim.sdu = range(sdu.parsinv[1:(ns*nt)], na.rm = TRUE)
 
 
 
